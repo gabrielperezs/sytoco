@@ -24,7 +24,7 @@ const (
 	awsLogsBatchSize       = 1048576 // bytes
 	awsLogsRecordExtraSize = 26      // bytes
 
-	inputTimeout = 10 * time.Second
+	inputTimeout = 15 * time.Second
 )
 
 type Config struct {
@@ -49,12 +49,11 @@ type LogClient struct {
 
 func New(cfg *Config) (*LogClient, error) {
 	l := &LogClient{
-		chAppend:          make(chan lib.Record, awsLogsBatchRecords),
-		chFlush:           make(chan bool, 1),
-		chTimeout:         time.NewTimer(inputTimeout),
-		logGroupName:      cfg.LogGroupName,
-		logStreamName:     cfg.LogStreamName,
-		nextSequenceToken: aws.String(""),
+		chAppend:      make(chan lib.Record, awsLogsBatchRecords),
+		chFlush:       make(chan bool, 1),
+		chTimeout:     time.NewTimer(inputTimeout),
+		logGroupName:  cfg.LogGroupName,
+		logStreamName: cfg.LogStreamName,
 	}
 	var err error
 	l.sess, err = session.NewSessionWithOptions(session.Options{
@@ -93,7 +92,10 @@ func New(cfg *Config) (*LogClient, error) {
 		return nil, err
 	}
 
-	*l.nextSequenceToken = *resp.LogStreams[0].UploadSequenceToken
+	if resp.LogStreams[0].UploadSequenceToken != nil {
+		l.nextSequenceToken = aws.String("")
+		*l.nextSequenceToken = *resp.LogStreams[0].UploadSequenceToken
+	}
 
 	go l.listener()
 	return l, nil
