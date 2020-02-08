@@ -83,7 +83,7 @@ func (sj *SystemdJournald) Write(p []byte) (n int, err error) {
 	for scanner.Scan() {
 		r := lib.Record{}
 		if err := r.UnmarshalJSON(scanner.Bytes()); err != nil {
-			log.Printf("sytoco/SystemdJournald Unmarshal error: %s <| %s |>", err, scanner.Text())
+			//log.Printf("sytoco/SystemdJournald Unmarshal error: %s <| %s |>", err, scanner.Text())
 			continue
 		}
 		for _, o := range sj.outputs {
