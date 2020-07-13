@@ -160,11 +160,11 @@ func (l *LogClient) Flush() {
 		LogStreamName: aws.String(l.logStreamName),
 		SequenceToken: l.nextSequenceToken,
 	})
-	if err != nil {
+	if err == nil {
+		l.nextSequenceToken = output.NextSequenceToken
+	} else {
 		log.Printf("sytoco/awsCloudwatchLogs ERROR: %s", err)
-		return
 	}
-	l.nextSequenceToken = output.NextSequenceToken
 	l.buffer = l.buffer[:0]
 	l.bufferSize = 0
 }
